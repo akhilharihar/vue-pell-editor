@@ -1,11 +1,11 @@
-<template lang="html">
+<template>
   <div
     ref="editor"
     class="vp-editor"
   >
     <div
-      class="vp-editor__placeholder"
       v-if="(vpContent === '' || vpContent === '<br>') && placeholder"
+      class="vp-editor__placeholder"
       @click="$refs.editor.content.focus()"
     >
       {{ placeholder }}
@@ -18,9 +18,10 @@ import pell from 'pell'
 
 export default {
   name: 'VuePellEditor',
-  components: {
-    pell
-  },
+
+  /**
+   * Props
+   */
   props: {
     actions: {
       type: Array,
@@ -50,16 +51,26 @@ export default {
       type: Object,
       default: () => {}
     },
-	defaultParagraphSeparator : {
-		type : String,
-		default : 'div'
-	}
+    defaultParagraphSeparator: {
+      type: String,
+      default: 'div'
+    }
   },
+
+  /**
+   * Data
+   */
   data: () => ({
-    vpContent: ''
+    vpContent: '',
+    pell: undefined
   }),
+
+  /**
+   * Watch
+   */
   watch: {
-    content: function (newVal, oldVal) { // eslint-disable-line
+    // eslint-disable-next-line
+    content: function(newVal, oldVal) {
       if (this.pell) {
         if (!!newVal && newVal !== this.vpContent) {
           this.vpContent = newVal
@@ -69,7 +80,8 @@ export default {
         }
       }
     },
-    value: function (newVal, oldVal) { // eslint-disable-line
+    // eslint-disable-next-line
+    value: function(newVal, oldVal) {
       if (this.pell) {
         if (!!newVal && newVal !== this.vpContent) {
           this.vpContent = newVal
@@ -80,19 +92,31 @@ export default {
       }
     }
   },
-  beforeDestroy () {
-    this.pell = null
+
+  /**
+   * Before Destroy
+   * Reset pell instance
+   */
+  beforeDestroy() {
+    this.pell = undefined
   },
-  mounted () {
+
+  /**
+   * Mounted
+   */
+  mounted() {
     this.init()
     this.$emit('mounted')
   },
+
+  /**
+   * Methods
+   */
   methods: {
-    init () {
+    init() {
       if (this.$el) {
         const options = {
           element: this.$refs.editor,
-
           onChange: (html) => {
             this.vpContent = html
             this.$emit('input', html)
@@ -102,26 +126,19 @@ export default {
             })
           },
           classes: this.classes,
-
           styleWithCSS: this.styleWithCss,
-
-		  defaultParagraphSeparator: this.defaultParagraphSeparator
+          defaultParagraphSeparator: this.defaultParagraphSeparator
         }
-
         if (this.actions && this.actions.length > 0) {
           options.actions = this.actions
         }
-
         const pellEditor = pell.init(options)
-
         this.pell = pellEditor
         window.pell = pell
-
         if (this.content || this.value) {
-          this.$refs.editor.content.innerHTML = (this.content || this.value)
-          this.vpContent = (this.content || this.value)
+          this.$refs.editor.content.innerHTML = this.content || this.value
+          this.vpContent = this.content || this.value
         }
-
         if (this.editorHeight !== '') {
           this.$refs.editor.content.style.height = this.editorHeight
         }
@@ -132,17 +149,17 @@ export default {
 </script>
 
 <style lang="scss">
-  @import '~pell/src/pell';
+@import '~pell/src/pell';
 
-  .vp-editor {
-    position: relative;
+.vp-editor {
+  position: relative;
 
-    &__placeholder {
-      position: absolute;
-      top: 42px;
-      left: 10px;
-      color: #ddd;
-      font-style: italic;
-    }
+  &__placeholder {
+    position: absolute;
+    top: 42px;
+    left: 10px;
+    color: #ddd;
+    font-style: italic;
   }
+}
 </style>
